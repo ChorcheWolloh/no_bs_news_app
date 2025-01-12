@@ -1,4 +1,4 @@
-const API_KEY = '9ea0ffec0b27407d8d62e651c472fa13';
+const API_KEY = ''; // needs free API Key for Development build
 let topic = '';
 let dateFrom = ''; //2025-01-01
 
