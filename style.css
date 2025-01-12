@@ -1,0 +1,19 @@
+
+.news-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    grid-auto-rows: 1fr;
+    align-items: start;
+}
+
+@media (max-width: 600px) {
+    .news-list {
+        grid-template-columns: auto;
+    }
+}
+
+.news {
+    min-height: 350px;
+    max-height: 550px;
+}

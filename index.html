@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="/main.js" defer></script>
+    <title>No BS NEWS App</title>
+</head>
+<body class="container-lg">
+    <header class="container-fluid navbar navbar-expand-lg">
+       <a href="#" class="navbar-brand">Lazy News</a>
+        <nav class="navbar">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active">Home</a>
+                </li>
+                <li>
+                    <a href="#" class="nav-link">Another Page</a>
+                </li>
+                <li>
+                    <a href="#" class="nav-link">About us</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <main class="news-container">
+        <section class="news-search mb-4">
+            <h2 class="text-center mb-4">What interests you?</h2>
+            <div class="input-group">
+                <span class="input-group-text">Write topic and date</span>
+                <input type="text" class="form-control" name="topic" id="topic">
+                <input type="date"  class="form-control" name="from-date" id="from-date">
+                <button type="button" id="search-btn" class="btn btn-outline-secondary">Search</button>
+            </div>
+        </section>
+        <section class="results card card-body d-none">
+            <h3 class="search-results-title m-4 text-center"></h3>
+        <div class="news-list mb-4">
+        </div>
+        <nav class="align-self-center">
+            <ul class="pagination ">
+              <li class="page-item" id="first-page"><a class="page-link" href="#">1</a></li>
+              <li class="page-item" id="second-page"><a class="page-link" href="#">2</a></li>
+              <li class="page-item" id="third-page"><a class="page-link" href="#">3</a></li>
+            </ul>
+          </nav>
+        </section>
+    </main>
+    <footer class="d-flex m-4 justify-content-center align-items-center">
+        <h6>created by me</h6>
+    </footer>
+</body>
+</html>
