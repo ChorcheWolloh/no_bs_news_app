@@ -1,26 +1,11 @@
 const API_KEY = '9ea0ffec0b27407d8d62e651c472fa13';
-let topic = '';
-let dateFrom = ''; //2025-01-01
 
 let firstPageArticles, secondPageArticles, thirdPageArticles;
-
-// possible refactor opportunity - move all variables from global scope to local
 let newsList = document.querySelector(".news-list");
 let searchBtn = document.querySelector('#search-btn');
-let searchedTopic = document.querySelector('.search-results-title');
-let newsSection = document.querySelector(".results");
 let dateInput = document.querySelector('#from-date');
 
-let firstPageBtn = document.querySelector("#first-page");
-let secondPageBtn = document.querySelector("#second-page");
-let thirdPageBtn = document.querySelector("#third-page");
-
-let paginationBtns = [firstPageBtn, secondPageBtn, thirdPageBtn];
-
-let today =  new Date().toISOString().slice(0, 10);
-let monthAgo =  getMonthAgo(new Date());
-dateInput.setAttribute('max', `${today}`);
-dateInput.setAttribute('min', `${monthAgo}`);
+limitDateInput(dateInput);
 
 let articleHTML = (article) => {
     return `
@@ -34,12 +19,12 @@ let articleHTML = (article) => {
                             <h6 class="author card-subtitle mb-2">${article.author}k</h6>
                             <h6 class="source card-subtitle mb-2">${article.source.name}</h6>
                         </div>
-                        <div class="publish-date card-subtitle">${convertDate(article.publishedAt)}</div>
+                        <div class="publish-date card-subtitle">${sliceDate(article.publishedAt)}</div>
                     </div>
                 `;
 }
 
-function convertDate(date){
+function sliceDate(date){
     return date.slice(0,10);
 }
 
@@ -51,42 +36,34 @@ function getMonthAgo(today){
     return monthAgo;
 }
 
+// limits input field by today and a month back
+function limitDateInput(dateInput){
+    let today = sliceDate(new Date().toISOString());
+    let monthAgo =  getMonthAgo(new Date());
+    dateInput.setAttribute('max', `${today}`);
+    dateInput.setAttribute('min', `${monthAgo}`);
+}
+
+// returns user input
 function getUserInput(){
+    let topic = '';
+    let dateFrom = ''; //2025-01-01
     topic = document.querySelector("#topic").value;
     dateFrom = dateInput.value;
+    return { topic, dateFrom };
 }
 
 // populates the container with articles
 function populateNewsList(articlesArr){
+    let articlesHTML = '';
     for (let i = 0; i < articlesArr.length; i++) {
-        let article = document.createElement('article');
-        article.setAttribute('class', 'news card card-body');
-        article.innerHTML = articleHTML(articlesArr[i]);
-        newsList.appendChild(article);
+        //instead of adding each article individually a string is build with all of them and appended once
+        articlesHTML += `<article class="news card card-body">${articleHTML(articlesArr[i])}</article>`;
     }
-
+    newsList.innerHTML = articlesHTML;
 }
 
-function init(API_KEY, topic, dateFrom){
-    let url = 'https://newsapi.org/v2/everything?' +
-          `q=${topic}&` +
-          `from=${dateFrom}&` +
-          'sortBy=popularity&' +
-          `apiKey=${API_KEY}`;
-    let req = new Request(url);
-    let newsPromise = fetch(req).then(response => response.json()).then((news) => {
-        return news;
-    });
-    newsPromise.then((news) =>{
-        let filteredNews = filterArticles(news.articles);
-        firstPageArticles = filteredNews.slice(0,12);
-        secondPageArticles = filteredNews.slice(10,22);
-        thirdPageArticles = filteredNews.slice(20,32);
-        populateNewsList(firstPageArticles);
-    });
-
-}
-
+// checks if article has [Removed] in the title and filters those out
 function filterArticles(articlesArr){
     let filteredArticlesArr = []
     for (let i = 0; i < articlesArr.length; i++) {
@@ -106,39 +83,67 @@ function clearPosts(){
     }
 }
 
-// adds clearing to each pagination button
-function btnPagination(){
-    paginationBtns.forEach((button) => {
-        button.addEventListener('click', (e) => {
-            clearPosts();
-            switch(button.id) {
-                case "first-page":
-                    populateNewsList(firstPageArticles);
-                    break;
-                case "second-page":
-                    populateNewsList(secondPageArticles);
-                    break;
-                case "third-page":
-                    populateNewsList(thirdPageArticles);
-                    break;
-                default:
-                    alert("Something went wrong, sorry.");
-                }
-        })
-    })
+// adds clearing to each pagination button and event listeners to populate another set of articles
+function setupPagination() {
+    let firstPageBtn = document.querySelector("#first-page");
+    let secondPageBtn = document.querySelector("#second-page");
+    let thirdPageBtn = document.querySelector("#third-page");
+    firstPageBtn.addEventListener('click', () => {
+        clearPosts();
+        populateNewsList(firstPageArticles);
+    });
+    secondPageBtn.addEventListener('click', () => {
+        clearPosts();
+        console.log(secondPageArticles);
+        populateNewsList(secondPageArticles);
+    });
+    thirdPageBtn.addEventListener('click', () => {
+        clearPosts();
+        populateNewsList(thirdPageArticles);
+    });
 }
 
+function init(API_KEY, topic, dateFrom){
+    let url = 'https://newsapi.org/v2/everything?' +
+          `q=${topic}&` +
+          `from=${dateFrom}&` +
+          'sortBy=popularity&' +
+          `apiKey=${API_KEY}`;
+    let req = new Request(url);
+    let newsPromise = fetch(req).then(response => response.json()).then((news) => {
+        return news;
+    });
+    newsPromise.then((news) =>{
+        let filteredNews = filterArticles(news.articles);
+        if (filteredNews.length === 0) {
+            let searchedTopic = document.querySelector('.search-results-title');
+            searchedTopic.innerHTML = `<p class="text-muted">No articles found for the selected topic and date range.</p>`;
+        } else {
+        firstPageArticles = filteredNews.slice(0,12); //limits to 12 articles
+        secondPageArticles = filteredNews.slice(12,24);
+        thirdPageArticles = filteredNews.slice(24,36);
+        populateNewsList(firstPageArticles);
+        setupPagination();
+        }
+    }).catch((error) => {
+        console.error("Error fetching news:", error);
+        alert("Unable to fetch news. Please check your connection.");
+    });
 
+}
 
 searchBtn.addEventListener('click', (e) => {
-    e.preventDefault;
-    getUserInput();
+    e.preventDefault();
+    let {topic, dateFrom} = getUserInput();
+    let searchedTopic = document.querySelector('.search-results-title');
     if (topic !== '' && dateFrom !== ''){
+        let newsSection = document.querySelector(".results");
         searchedTopic.innerHTML = `News results for: ${topic}`;
         newsSection.classList.remove('d-none');
         init(API_KEY, topic, dateFrom);
-        btnPagination();
     } else {
         alert("Please provide any input!")
+        clearPosts();
+        searchedTopic.innerHTML = '';
     }
 })
